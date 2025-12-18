@@ -47,6 +47,35 @@
             font-size: 1.1em;
         }
 
+        /* User Bar */
+        .user-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info {
+            color: white;
+            font-weight: 500;
+        }
+
+        .user-bar .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .user-bar .btn-small:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
         .card {
             background: white;
             border-radius: 20px;
@@ -97,6 +126,108 @@
         .today-date {
             opacity: 0.9;
             font-size: 1.1em;
+        }
+
+        /* Auth Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        .auth-tabs button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .auth-tabs button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .auth-error {
+            background: #ffe0e0;
+            color: #c00;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .auth-error.show {
+            display: block;
         }
 
         /* People Management */
@@ -179,8 +310,18 @@
             transform: translateY(0);
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-full {
+            width: 100%;
         }
 
         /* Calendar */
@@ -194,6 +335,7 @@
         .calendar-nav {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .calendar-nav button {
@@ -268,10 +410,6 @@
             font-weight: 500;
         }
 
-        .day-emoji {
-            font-size: 1.2em;
-        }
-
         /* Week View */
         .week-view {
             display: none;
@@ -292,7 +430,6 @@
         .view-toggle {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
         }
 
         .view-toggle button {
@@ -374,11 +511,25 @@
             margin-bottom: 15px;
         }
 
-        /* Confetti effect */
-        .confetti {
-            position: fixed;
-            pointer-events: none;
-            z-index: 1000;
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Sync indicator */
+        .sync-status {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.7);
         }
 
         /* Responsive */
@@ -407,6 +558,11 @@
             .today-person {
                 font-size: 2em;
             }
+
+            .user-bar {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
 
         /* Fun hover effects */
@@ -419,37 +575,90 @@
             25% { transform: rotate(-5deg); }
             75% { transform: rotate(5deg); }
         }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <h2 id="authTitle">Welcome to Dish Duty!</h2>
+
+            <div class="auth-tabs">
+                <button class="active" onclick="switchAuthTab('login')">Login</button>
+                <button onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <div class="auth-error" id="authError"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-full" id="loginBtn">Login</button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="signupName" required minlength="2" maxlength="50" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password (min 6 characters)</label>
+                    <input type="password" id="signupPassword" required minlength="6" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-full" id="signupBtn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
     <div class="container">
+        <!-- User Bar -->
+        <div class="user-bar" id="userBar">
+            <span class="user-info" id="userGreeting">Hello!</span>
+            <span class="sync-status" id="syncStatus"></span>
+            <button class="btn btn-small" onclick="logout()">Logout</button>
+        </div>
+
         <header>
-            <h1>🍽️ Dish Duty</h1>
+            <h1>Dish Duty</h1>
             <p class="subtitle">Never forget whose turn it is!</p>
         </header>
 
         <!-- Today's Hero -->
         <div class="card today-hero" id="todayCard">
-            <h2>🧼 Today's Dish Hero</h2>
+            <h2>Today's Dish Hero</h2>
             <div class="today-person" id="todayPerson">-</div>
             <div class="today-date" id="todayDate"></div>
         </div>
 
         <!-- People Management -->
         <div class="card">
-            <h2>👥 The Dish Squad</h2>
-            <div class="people-section" id="peopleList">
-                <!-- People tags will be added here -->
-            </div>
+            <h2>The Dish Squad</h2>
+            <div class="people-section" id="peopleList"></div>
             <div class="add-person-form">
-                <input type="text" id="personName" placeholder="Enter name..." maxlength="20">
+                <input type="text" id="personName" placeholder="Enter name..." maxlength="50">
                 <button class="btn" onclick="addPerson()">Add Person</button>
             </div>
         </div>
 
         <!-- Schedule Settings -->
         <div class="card">
-            <h2>📅 Schedule Settings</h2>
+            <h2>Schedule Settings</h2>
             <div class="start-date-section">
                 <label>Rotation started on:</label>
                 <input type="date" id="startDate" onchange="updateStartDate()">
@@ -463,7 +672,7 @@
         <!-- Calendar View -->
         <div class="card">
             <div class="calendar-header">
-                <h2>📆 Dish Calendar</h2>
+                <h2>Dish Calendar</h2>
                 <div class="view-toggle">
                     <button class="active" onclick="setView('calendar')">Month</button>
                     <button onclick="setView('week')">Week</button>
@@ -471,91 +680,321 @@
             </div>
 
             <div class="calendar-nav">
-                <button onclick="previousPeriod()">←</button>
+                <button onclick="previousPeriod()">&larr;</button>
                 <span id="currentPeriod" style="font-weight: bold; font-size: 1.2em;"></span>
-                <button onclick="nextPeriod()">→</button>
+                <button onclick="nextPeriod()">&rarr;</button>
                 <button class="btn" style="margin-left: auto;" onclick="goToToday()">Today</button>
             </div>
 
             <div class="calendar-view" id="calendarView">
-                <div class="calendar-grid" id="calendarGrid">
-                    <!-- Calendar will be rendered here -->
-                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
             </div>
 
-            <div class="week-view" id="weekView">
-                <!-- Week view will be rendered here -->
-            </div>
+            <div class="week-view" id="weekView"></div>
         </div>
     </div>
 
     <script>
-        // State
+        // ============ State ============
         let state = {
+            user: null,
+            token: null,
             people: [],
             startDate: new Date().toISOString().split('T')[0],
             currentView: 'calendar',
             viewDate: new Date()
         };
 
-        // Emoji assignments for people
-        const dishEmojis = ['🍳', '🥘', '🍲', '🥗', '🍜', '🍝', '🥙', '🌮', '🍕', '🍔'];
+        const dishEmojis = ['&#127859;', '&#129368;', '&#127858;', '&#129367;', '&#127836;', '&#127837;', '&#129369;', '&#127790;', '&#127829;', '&#127828;'];
+        const API_BASE = '/api';
 
-        // Load state from localStorage
-        function loadState() {
-            const saved = localStorage.getItem('dishDutyState');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                state.people = parsed.people || [];
-                state.startDate = parsed.startDate || new Date().toISOString().split('T')[0];
-            }
-            document.getElementById('startDate').value = state.startDate;
+        // ============ Utility Functions ============
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
-        // Save state to localStorage
-        function saveState() {
-            localStorage.setItem('dishDutyState', JSON.stringify({
+        function showError(message) {
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('authError').classList.remove('show');
+        }
+
+        function setSyncStatus(status) {
+            document.getElementById('syncStatus').textContent = status;
+        }
+
+        // ============ Auth Functions ============
+        function switchAuthTab(tab) {
+            const tabs = document.querySelectorAll('.auth-tabs button');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            hideError();
+
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('signupForm').classList.add('hidden');
+                document.getElementById('authTitle').textContent = 'Welcome Back!';
+            } else {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('signupForm').classList.remove('hidden');
+                document.getElementById('authTitle').textContent = 'Create Your Account';
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideError();
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPassword').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
+                }
+
+                // Save token and user
+                state.token = data.token;
+                state.user = data.user;
+                localStorage.setItem('dishDutyToken', data.token);
+                localStorage.setItem('dishDutyUser', JSON.stringify(data.user));
+
+                // Load user's schedule
+                await loadSchedule();
+
+                // Hide modal and show app
+                document.getElementById('authModal').classList.add('hidden');
+                updateUserBar();
+                renderAll();
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            hideError();
+
+            const btn = document.getElementById('signupBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: document.getElementById('signupName').value,
+                        email: document.getElementById('signupEmail').value,
+                        password: document.getElementById('signupPassword').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Signup failed');
+                }
+
+                // Save token and user
+                state.token = data.token;
+                state.user = data.user;
+                localStorage.setItem('dishDutyToken', data.token);
+                localStorage.setItem('dishDutyUser', JSON.stringify(data.user));
+
+                // Hide modal and show app
+                document.getElementById('authModal').classList.add('hidden');
+                updateUserBar();
+                renderAll();
+
+                // Welcome confetti!
+                createConfetti();
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+        }
+
+        async function checkExistingSession() {
+            const token = localStorage.getItem('dishDutyToken');
+            const user = localStorage.getItem('dishDutyUser');
+
+            if (!token || !user) {
+                document.getElementById('authModal').classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    state.token = token;
+                    state.user = JSON.parse(user);
+                    await loadSchedule();
+                    document.getElementById('authModal').classList.add('hidden');
+                    updateUserBar();
+                    renderAll();
+                } else {
+                    // Token invalid, show login
+                    localStorage.removeItem('dishDutyToken');
+                    localStorage.removeItem('dishDutyUser');
+                    document.getElementById('authModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                // Network error - use cached data
+                state.token = token;
+                state.user = JSON.parse(user);
+                loadLocalSchedule();
+                document.getElementById('authModal').classList.add('hidden');
+                updateUserBar();
+                renderAll();
+                setSyncStatus('(offline)');
+            }
+        }
+
+        function logout() {
+            state.token = null;
+            state.user = null;
+            state.people = [];
+            state.startDate = new Date().toISOString().split('T')[0];
+            localStorage.removeItem('dishDutyToken');
+            localStorage.removeItem('dishDutyUser');
+            localStorage.removeItem('dishDutySchedule');
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('signupForm').reset();
+        }
+
+        function updateUserBar() {
+            if (state.user) {
+                document.getElementById('userGreeting').textContent = `Hello, ${escapeHtml(state.user.name)}!`;
+            }
+        }
+
+        // ============ Schedule API Functions ============
+        async function loadSchedule() {
+            try {
+                const response = await fetch(`${API_BASE}/schedule/load`, {
+                    headers: { 'Authorization': `Bearer ${state.token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    state.people = data.schedule.people || [];
+                    state.startDate = data.schedule.startDate || new Date().toISOString().split('T')[0];
+                    // Cache locally
+                    saveLocalSchedule();
+                }
+            } catch (error) {
+                // Load from local cache
+                loadLocalSchedule();
+            }
+        }
+
+        async function saveSchedule() {
+            saveLocalSchedule();
+            setSyncStatus('Saving...');
+
+            try {
+                const response = await fetch(`${API_BASE}/schedule/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.token}`
+                    },
+                    body: JSON.stringify({
+                        people: state.people,
+                        startDate: state.startDate
+                    })
+                });
+
+                if (response.ok) {
+                    setSyncStatus('Saved!');
+                    setTimeout(() => setSyncStatus(''), 2000);
+                } else {
+                    setSyncStatus('Save failed');
+                }
+            } catch (error) {
+                setSyncStatus('(offline)');
+            }
+        }
+
+        function saveLocalSchedule() {
+            localStorage.setItem('dishDutySchedule', JSON.stringify({
                 people: state.people,
                 startDate: state.startDate
             }));
         }
 
-        // Add a person
+        function loadLocalSchedule() {
+            const cached = localStorage.getItem('dishDutySchedule');
+            if (cached) {
+                const data = JSON.parse(cached);
+                state.people = data.people || [];
+                state.startDate = data.startDate || new Date().toISOString().split('T')[0];
+            }
+        }
+
+        // ============ App Functions ============
         function addPerson() {
             const input = document.getElementById('personName');
             const name = input.value.trim();
 
-            if (name && !state.people.includes(name)) {
+            if (name && !state.people.includes(name) && state.people.length < 20) {
                 state.people.push(name);
-                saveState();
+                saveSchedule();
                 renderPeople();
                 renderCalendar();
                 updateTodayHero();
                 input.value = '';
-
-                // Fun confetti effect
                 createConfetti();
             }
             input.focus();
         }
 
-        // Remove a person
-        function removePerson(name) {
-            state.people = state.people.filter(p => p !== name);
-            saveState();
+        function removePerson(index) {
+            state.people.splice(index, 1);
+            saveSchedule();
             renderPeople();
             renderCalendar();
             updateTodayHero();
         }
 
-        // Get person for a specific date
         function getPersonForDate(date) {
             if (state.people.length === 0) return null;
 
             const start = new Date(state.startDate);
             const target = new Date(date);
 
-            // Reset times to midnight for accurate day calculation
             start.setHours(0, 0, 0, 0);
             target.setHours(0, 0, 0, 0);
 
@@ -568,56 +1007,59 @@
             return state.people[personIndex];
         }
 
-        // Get emoji for person
         function getEmojiForPerson(name) {
             const index = state.people.indexOf(name);
             return dishEmojis[index % dishEmojis.length];
         }
 
-        // Update start date
         function updateStartDate() {
             state.startDate = document.getElementById('startDate').value;
-            saveState();
+            saveSchedule();
             renderCalendar();
             updateTodayHero();
         }
 
-        // Set start date to today
         function setToToday() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             state.startDate = today;
-            saveState();
+            saveSchedule();
             renderCalendar();
             updateTodayHero();
         }
 
-        // Render people tags
+        // ============ Render Functions ============
+        function renderAll() {
+            document.getElementById('startDate').value = state.startDate;
+            renderPeople();
+            renderCalendar();
+            updateTodayHero();
+        }
+
         function renderPeople() {
             const container = document.getElementById('peopleList');
 
             if (state.people.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="emoji">🤷</div><p>No one added yet! Add your housemates above.</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="emoji">&#129335;</div><p>No one added yet! Add your housemates above.</p></div>';
                 return;
             }
 
             container.innerHTML = state.people.map((person, index) => `
                 <div class="person-tag wobble">
                     <span>${dishEmojis[index % dishEmojis.length]}</span>
-                    <span>${person}</span>
-                    <button onclick="removePerson('${person}')">&times;</button>
+                    <span>${escapeHtml(person)}</span>
+                    <button onclick="removePerson(${index})">&times;</button>
                 </div>
             `).join('');
         }
 
-        // Update today's hero section
         function updateTodayHero() {
             const today = new Date();
             const person = getPersonForDate(today);
 
-            document.getElementById('todayPerson').textContent = person ?
-                `${getEmojiForPerson(person)} ${person}` :
-                'Add people to start!';
+            document.getElementById('todayPerson').innerHTML = person
+                ? `${getEmojiForPerson(person)} ${escapeHtml(person)}`
+                : 'Add people to start!';
 
             document.getElementById('todayDate').textContent = today.toLocaleDateString('en-US', {
                 weekday: 'long',
@@ -627,7 +1069,6 @@
             });
         }
 
-        // Set view mode
         function setView(view) {
             state.currentView = view;
 
@@ -647,7 +1088,6 @@
             renderCalendar();
         }
 
-        // Navigate calendar
         function previousPeriod() {
             if (state.currentView === 'calendar') {
                 state.viewDate.setMonth(state.viewDate.getMonth() - 1);
@@ -671,7 +1111,6 @@
             renderCalendar();
         }
 
-        // Render calendar
         function renderCalendar() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -697,7 +1136,6 @@
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             let html = days.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
 
-            // Previous month padding
             const prevMonth = new Date(year, month, 0);
             for (let i = startPadding - 1; i >= 0; i--) {
                 const day = prevMonth.getDate() - i;
@@ -706,12 +1144,11 @@
                 html += `
                     <div class="calendar-day other-month">
                         <div class="day-number">${day}</div>
-                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${person}</div>` : ''}
+                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${escapeHtml(person)}</div>` : ''}
                     </div>
                 `;
             }
 
-            // Current month
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const date = new Date(year, month, day);
                 date.setHours(0, 0, 0, 0);
@@ -722,12 +1159,11 @@
                 html += `
                     <div class="calendar-day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}">
                         <div class="day-number">${day}</div>
-                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${person}</div>` : ''}
+                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${escapeHtml(person)}</div>` : ''}
                     </div>
                 `;
             }
 
-            // Next month padding
             const totalCells = startPadding + lastDay.getDate();
             const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
             for (let day = 1; day <= remainingCells; day++) {
@@ -736,7 +1172,7 @@
                 html += `
                     <div class="calendar-day other-month">
                         <div class="day-number">${day}</div>
-                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${person}</div>` : ''}
+                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${escapeHtml(person)}</div>` : ''}
                     </div>
                 `;
             }
@@ -769,7 +1205,7 @@
                             ${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </div>
                         <div class="week-person">
-                            ${person || 'No one assigned'}
+                            ${person ? escapeHtml(person) : 'No one assigned'}
                         </div>
                         ${person ? `<div class="week-emoji">${getEmojiForPerson(person)}</div>` : ''}
                     </div>
@@ -779,14 +1215,13 @@
             document.getElementById('weekView').innerHTML = html;
         }
 
-        // Fun confetti effect
+        // ============ Fun Effects ============
         function createConfetti() {
             const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#38ef7d'];
 
             for (let i = 0; i < 30; i++) {
                 setTimeout(() => {
                     const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
                     confetti.style.cssText = `
                         position: fixed;
                         left: ${Math.random() * 100}vw;
@@ -800,39 +1235,27 @@
                         animation: fall ${2 + Math.random() * 2}s linear forwards;
                     `;
                     document.body.appendChild(confetti);
-
                     setTimeout(() => confetti.remove(), 4000);
                 }, i * 50);
             }
 
-            // Add falling animation
             if (!document.getElementById('confettiStyle')) {
                 const style = document.createElement('style');
                 style.id = 'confettiStyle';
-                style.textContent = `
-                    @keyframes fall {
-                        to {
-                            transform: translateY(100vh) rotate(720deg);
-                            opacity: 0;
-                        }
-                    }
-                `;
+                style.textContent = `@keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }`;
                 document.head.appendChild(style);
             }
         }
 
-        // Enter key support
+        // ============ Event Listeners ============
         document.getElementById('personName').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addPerson();
             }
         });
 
-        // Initialize
-        loadState();
-        renderPeople();
-        renderCalendar();
-        updateTodayHero();
+        // ============ Initialize ============
+        checkExistingSession();
     </script>
 </body>
 </html>
