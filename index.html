@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dish Duty - Who's Washing Today?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: bounceIn 0.8s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .today-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .today-hero h2 {
+            color: white;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .today-person {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .today-date {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        /* People Management */
+        .people-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .person-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: popIn 0.3s ease;
+            font-weight: 500;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .person-tag button {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .person-tag button:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .add-person-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="date"] {
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus {
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        /* Calendar */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.2s;
+        }
+
+        .calendar-nav button:hover {
+            background: #e0e0e0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        .calendar-day {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px;
+            min-height: 80px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .calendar-day.today .day-person {
+            color: white;
+        }
+
+        .calendar-day.past {
+            opacity: 0.6;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .day-person {
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .day-emoji {
+            font-size: 1.2em;
+        }
+
+        /* Week View */
+        .week-view {
+            display: none;
+        }
+
+        .week-view.active {
+            display: block;
+        }
+
+        .calendar-view {
+            display: block;
+        }
+
+        .calendar-view.hidden {
+            display: none;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .view-toggle button {
+            padding: 8px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .week-day {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+
+        .week-day:hover {
+            transform: translateX(5px);
+        }
+
+        .week-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .week-day.today .week-person {
+            color: white;
+        }
+
+        .week-date {
+            width: 120px;
+            font-weight: bold;
+        }
+
+        .week-person {
+            flex: 1;
+            color: #667eea;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        .week-emoji {
+            font-size: 1.5em;
+        }
+
+        /* Start Date Section */
+        .start-date-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .start-date-section label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .empty-state .emoji {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        /* Confetti effect */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                min-height: 60px;
+                padding: 5px;
+            }
+
+            .day-number {
+                font-size: 0.9em;
+            }
+
+            .day-person {
+                font-size: 0.7em;
+            }
+
+            .today-person {
+                font-size: 2em;
+            }
+        }
+
+        /* Fun hover effects */
+        .wobble:hover {
+            animation: wobble 0.5s ease;
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ Dish Duty</h1>
+            <p class="subtitle">Never forget whose turn it is!</p>
+        </header>
+
+        <!-- Today's Hero -->
+        <div class="card today-hero" id="todayCard">
+            <h2>🧼 Today's Dish Hero</h2>
+            <div class="today-person" id="todayPerson">-</div>
+            <div class="today-date" id="todayDate"></div>
+        </div>
+
+        <!-- People Management -->
+        <div class="card">
+            <h2>👥 The Dish Squad</h2>
+            <div class="people-section" id="peopleList">
+                <!-- People tags will be added here -->
+            </div>
+            <div class="add-person-form">
+                <input type="text" id="personName" placeholder="Enter name..." maxlength="20">
+                <button class="btn" onclick="addPerson()">Add Person</button>
+            </div>
+        </div>
+
+        <!-- Schedule Settings -->
+        <div class="card">
+            <h2>📅 Schedule Settings</h2>
+            <div class="start-date-section">
+                <label>Rotation started on:</label>
+                <input type="date" id="startDate" onchange="updateStartDate()">
+                <button class="btn btn-secondary" onclick="setToToday()">Start Today</button>
+            </div>
+            <p style="margin-top: 15px; color: #888; font-size: 0.9em;">
+                Set the date when your first person started washing dishes. The rotation will continue from there!
+            </p>
+        </div>
+
+        <!-- Calendar View -->
+        <div class="card">
+            <div class="calendar-header">
+                <h2>📆 Dish Calendar</h2>
+                <div class="view-toggle">
+                    <button class="active" onclick="setView('calendar')">Month</button>
+                    <button onclick="setView('week')">Week</button>
+                </div>
+            </div>
+
+            <div class="calendar-nav">
+                <button onclick="previousPeriod()">←</button>
+                <span id="currentPeriod" style="font-weight: bold; font-size: 1.2em;"></span>
+                <button onclick="nextPeriod()">→</button>
+                <button class="btn" style="margin-left: auto;" onclick="goToToday()">Today</button>
+            </div>
+
+            <div class="calendar-view" id="calendarView">
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be rendered here -->
+                </div>
+            </div>
+
+            <div class="week-view" id="weekView">
+                <!-- Week view will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let state = {
+            people: [],
+            startDate: new Date().toISOString().split('T')[0],
+            currentView: 'calendar',
+            viewDate: new Date()
+        };
+
+        // Emoji assignments for people
+        const dishEmojis = ['🍳', '🥘', '🍲', '🥗', '🍜', '🍝', '🥙', '🌮', '🍕', '🍔'];
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('dishDutyState');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.people = parsed.people || [];
+                state.startDate = parsed.startDate || new Date().toISOString().split('T')[0];
+            }
+            document.getElementById('startDate').value = state.startDate;
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('dishDutyState', JSON.stringify({
+                people: state.people,
+                startDate: state.startDate
+            }));
+        }
+
+        // Add a person
+        function addPerson() {
+            const input = document.getElementById('personName');
+            const name = input.value.trim();
+
+            if (name && !state.people.includes(name)) {
+                state.people.push(name);
+                saveState();
+                renderPeople();
+                renderCalendar();
+                updateTodayHero();
+                input.value = '';
+
+                // Fun confetti effect
+                createConfetti();
+            }
+            input.focus();
+        }
+
+        // Remove a person
+        function removePerson(name) {
+            state.people = state.people.filter(p => p !== name);
+            saveState();
+            renderPeople();
+            renderCalendar();
+            updateTodayHero();
+        }
+
+        // Get person for a specific date
+        function getPersonForDate(date) {
+            if (state.people.length === 0) return null;
+
+            const start = new Date(state.startDate);
+            const target = new Date(date);
+
+            // Reset times to midnight for accurate day calculation
+            start.setHours(0, 0, 0, 0);
+            target.setHours(0, 0, 0, 0);
+
+            const diffTime = target - start;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) return null;
+
+            const personIndex = diffDays % state.people.length;
+            return state.people[personIndex];
+        }
+
+        // Get emoji for person
+        function getEmojiForPerson(name) {
+            const index = state.people.indexOf(name);
+            return dishEmojis[index % dishEmojis.length];
+        }
+
+        // Update start date
+        function updateStartDate() {
+            state.startDate = document.getElementById('startDate').value;
+            saveState();
+            renderCalendar();
+            updateTodayHero();
+        }
+
+        // Set start date to today
+        function setToToday() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            state.startDate = today;
+            saveState();
+            renderCalendar();
+            updateTodayHero();
+        }
+
+        // Render people tags
+        function renderPeople() {
+            const container = document.getElementById('peopleList');
+
+            if (state.people.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="emoji">🤷</div><p>No one added yet! Add your housemates above.</p></div>';
+                return;
+            }
+
+            container.innerHTML = state.people.map((person, index) => `
+                <div class="person-tag wobble">
+                    <span>${dishEmojis[index % dishEmojis.length]}</span>
+                    <span>${person}</span>
+                    <button onclick="removePerson('${person}')">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        // Update today's hero section
+        function updateTodayHero() {
+            const today = new Date();
+            const person = getPersonForDate(today);
+
+            document.getElementById('todayPerson').textContent = person ?
+                `${getEmojiForPerson(person)} ${person}` :
+                'Add people to start!';
+
+            document.getElementById('todayDate').textContent = today.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Set view mode
+        function setView(view) {
+            state.currentView = view;
+
+            document.querySelectorAll('.view-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (view === 'calendar') {
+                document.getElementById('calendarView').classList.remove('hidden');
+                document.getElementById('weekView').classList.remove('active');
+            } else {
+                document.getElementById('calendarView').classList.add('hidden');
+                document.getElementById('weekView').classList.add('active');
+            }
+
+            renderCalendar();
+        }
+
+        // Navigate calendar
+        function previousPeriod() {
+            if (state.currentView === 'calendar') {
+                state.viewDate.setMonth(state.viewDate.getMonth() - 1);
+            } else {
+                state.viewDate.setDate(state.viewDate.getDate() - 7);
+            }
+            renderCalendar();
+        }
+
+        function nextPeriod() {
+            if (state.currentView === 'calendar') {
+                state.viewDate.setMonth(state.viewDate.getMonth() + 1);
+            } else {
+                state.viewDate.setDate(state.viewDate.getDate() + 7);
+            }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            state.viewDate = new Date();
+            renderCalendar();
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (state.currentView === 'calendar') {
+                renderMonthView(today);
+            } else {
+                renderWeekView(today);
+            }
+        }
+
+        function renderMonthView(today) {
+            const year = state.viewDate.getFullYear();
+            const month = state.viewDate.getMonth();
+
+            document.getElementById('currentPeriod').textContent =
+                state.viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startPadding = firstDay.getDay();
+
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            let html = days.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+            // Previous month padding
+            const prevMonth = new Date(year, month, 0);
+            for (let i = startPadding - 1; i >= 0; i--) {
+                const day = prevMonth.getDate() - i;
+                const date = new Date(year, month - 1, day);
+                const person = getPersonForDate(date);
+                html += `
+                    <div class="calendar-day other-month">
+                        <div class="day-number">${day}</div>
+                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${person}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Current month
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const date = new Date(year, month, day);
+                date.setHours(0, 0, 0, 0);
+                const person = getPersonForDate(date);
+                const isToday = date.getTime() === today.getTime();
+                const isPast = date < today;
+
+                html += `
+                    <div class="calendar-day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}">
+                        <div class="day-number">${day}</div>
+                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${person}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Next month padding
+            const totalCells = startPadding + lastDay.getDate();
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let day = 1; day <= remainingCells; day++) {
+                const date = new Date(year, month + 1, day);
+                const person = getPersonForDate(date);
+                html += `
+                    <div class="calendar-day other-month">
+                        <div class="day-number">${day}</div>
+                        ${person ? `<div class="day-person">${getEmojiForPerson(person)} ${person}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            document.getElementById('calendarGrid').innerHTML = html;
+        }
+
+        function renderWeekView(today) {
+            const startOfWeek = new Date(state.viewDate);
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+            document.getElementById('currentPeriod').textContent =
+                `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(date.getDate() + i);
+                date.setHours(0, 0, 0, 0);
+
+                const person = getPersonForDate(date);
+                const isToday = date.getTime() === today.getTime();
+
+                html += `
+                    <div class="week-day ${isToday ? 'today' : ''}">
+                        <div class="week-date">
+                            ${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </div>
+                        <div class="week-person">
+                            ${person || 'No one assigned'}
+                        </div>
+                        ${person ? `<div class="week-emoji">${getEmojiForPerson(person)}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            document.getElementById('weekView').innerHTML = html;
+        }
+
+        // Fun confetti effect
+        function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#38ef7d'];
+
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.cssText = `
+                        position: fixed;
+                        left: ${Math.random() * 100}vw;
+                        top: -10px;
+                        width: 10px;
+                        height: 10px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                        pointer-events: none;
+                        z-index: 1000;
+                        animation: fall ${2 + Math.random() * 2}s linear forwards;
+                    `;
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 50);
+            }
+
+            // Add falling animation
+            if (!document.getElementById('confettiStyle')) {
+                const style = document.createElement('style');
+                style.id = 'confettiStyle';
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(720deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Enter key support
+        document.getElementById('personName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPerson();
+            }
+        });
+
+        // Initialize
+        loadState();
+        renderPeople();
+        renderCalendar();
+        updateTodayHero();
+    </script>
+</body>
+</html>
